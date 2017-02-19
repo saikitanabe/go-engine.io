@@ -162,9 +162,16 @@ func (d *PayloadDecoder) Next() (*PacketDecoder, error) {
 			line[i] = line[i] + '0'
 		}
 	}
-	packetLen, err := strconv.ParseInt(string(lenByte), 10, 64)
+	_, err = strconv.ParseInt(string(lenByte), 10, 64)
 	if err != nil {
 		return nil, fmt.Errorf("invalid input")
 	}
-	return NewDecoder(newLimitReader(d.r, int(packetLen)))
+
+	// fmt.Println("packetLen", packetLen)
+	// ST: 19.2.2017 socket.io js client v1.7.2 sends wrong length
+	// for unicode package data when using polling, do not limit and let it read the whole stream.
+
+	// return NewDecoder(newLimitReader(d.r, int(packetLen)))
+
+	return NewDecoder(d.r)
 }
