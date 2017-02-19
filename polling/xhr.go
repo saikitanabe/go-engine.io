@@ -1,7 +1,7 @@
 package polling
 
 import (
-	"github.com/googollee/go-engine.io/transport"
+	"github.com/saikitanabe/go-engine.io/transport"
 )
 
 var Creater = transport.Creater{
