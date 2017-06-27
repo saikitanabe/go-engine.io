@@ -4,10 +4,12 @@ import (
 	"io"
 	"net/http"
 
+	"fmt"
+
+	"github.com/gorilla/websocket"
 	"github.com/saikitanabe/go-engine.io/message"
 	"github.com/saikitanabe/go-engine.io/parser"
 	"github.com/saikitanabe/go-engine.io/transport"
-	"github.com/gorilla/websocket"
 )
 
 type Server struct {
@@ -16,7 +18,10 @@ type Server struct {
 }
 
 func NewServer(w http.ResponseWriter, r *http.Request, callback transport.Callback) (transport.Server, error) {
-	conn, err := websocket.Upgrade(w, r, nil, 10240, 10240)
+	// conn, err := websocket.Upgrade(w, r, nil, 10240, 10240)
+
+	// use Gorilla's default websocket check origin to prevent access from other domains
+	conn, err := upgradeWebsocket(w, r, nil, 10240, 10240)
 	if err != nil {
 		return nil, err
 	}
@@ -29,6 +34,22 @@ func NewServer(w http.ResponseWriter, r *http.Request, callback transport.Callba
 	go ret.serveHTTP(w, r)
 
 	return ret, nil
+}
+
+func upgradeWebsocket(w http.ResponseWriter, r *http.Request, responseHeader http.Header, readBufSize, writeBufSize int) (*websocket.Conn, error) {
+	u := websocket.Upgrader{ReadBufferSize: readBufSize, WriteBufferSize: writeBufSize}
+	u.Error = func(w http.ResponseWriter, r *http.Request, status int, reason error) {
+		// don't return errors to maintain backwards compatibility
+	}
+
+	// Don't set this; do not allow connect from any domain
+	// u.CheckOrigin = func(r *http.Request) bool {
+	// 	// allow all connections by default
+	// 	return true
+	// }
+
+	fmt.Println("upgrader...")
+	return u.Upgrade(w, r, responseHeader)
 }
 
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
