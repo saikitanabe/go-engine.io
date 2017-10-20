@@ -4,8 +4,6 @@ import (
 	"io"
 	"net/http"
 
-	"fmt"
-
 	"github.com/gorilla/websocket"
 	"github.com/saikitanabe/go-engine.io/message"
 	"github.com/saikitanabe/go-engine.io/parser"
@@ -48,7 +46,7 @@ func upgradeWebsocket(w http.ResponseWriter, r *http.Request, responseHeader htt
 	// 	return true
 	// }
 
-	fmt.Println("upgrader...")
+	// fmt.Println("upgrader...")
 	return u.Upgrade(w, r, responseHeader)
 }
 
